@@ -269,15 +269,16 @@ textarea{width:100%;font:15px var(--font);border:1.5px solid #b9cde1;border-radi
   #print td,#print th{border:1px solid #999;padding:6px;text-align:left}
 }
 /* ---------- Splash ---------- */
-#splash{position:absolute;inset:0;z-index:80;display:none;color:#fff;overflow:hidden;background:radial-gradient(900px 620px at 72% 45%,#163b74 0%,#0b1e3f 52%,#040b18 100%)}
+#stage.sp-on{overflow:visible;box-shadow:none}
+#splash{position:absolute;top:calc(-1*var(--by,0px));bottom:calc(-1*var(--by,0px));left:calc(-1*var(--bx,0px));right:calc(-1*var(--bx,0px));z-index:80;display:none;color:#fff;overflow:hidden;background:radial-gradient(900px 620px at 72% 45%,#163b74 0%,#0b1e3f 52%,#040b18 100%)}
 #splash.show{display:block}
 #splash.out{opacity:0;transition:opacity .45s ease;pointer-events:none}
 .sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,194,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,255,.07) 1px,transparent 1px);background-size:40px 40px;-webkit-mask-image:radial-gradient(ellipse at 60% 50%,#000 30%,transparent 78%);mask-image:radial-gradient(ellipse at 60% 50%,#000 30%,transparent 78%)}
-.sp-fiber{position:absolute;inset:0;width:100%;height:100%}
+.sp-fiber{position:absolute;left:var(--bx,0px);top:var(--by,0px);width:1280px;height:720px;overflow:visible}
 .sp-fiber path{fill:none;stroke-linecap:round}
 .sp-fiber .pulse{stroke-dasharray:40 700;animation:spFlow 2.4s linear infinite}
 @keyframes spFlow{from{stroke-dashoffset:740}to{stroke-dashoffset:0}}
-.sp-left{position:absolute;left:78px;top:132px;width:540px}
+.sp-left{position:absolute;left:calc(78px + var(--bx,0px));top:calc(132px + var(--by,0px));width:540px}
 .sp-title{font-size:66px;line-height:1.02;margin:16px 0 12px;font-weight:900;font-style:italic;letter-spacing:-.5px;background:linear-gradient(180deg,#fff 30%,#9fe8ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sp-tag{font-size:20px;line-height:1.4;color:#cfe6ff;margin:0}
 .sp-btns{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
@@ -289,7 +290,7 @@ textarea{width:100%;font:15px var(--font);border:1.5px solid #b9cde1;border-radi
 .sp-load .bar{height:6px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
 .sp-load .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),#7cf0ff);animation:spBar 3.3s ease-out forwards}
 @keyframes spBar{to{width:100%}}
-.sp-dev{position:absolute;left:668px;top:118px;width:540px;height:380px;border-radius:34px;background:linear-gradient(180deg,#ff9b32 0%,#e86a00 100%);box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 -6px 0 rgba(0,0,0,.18)}
+.sp-dev{position:absolute;left:calc(668px + var(--bx,0px));top:calc(118px + var(--by,0px));width:540px;height:380px;border-radius:34px;background:linear-gradient(180deg,#ff9b32 0%,#e86a00 100%);box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 -6px 0 rgba(0,0,0,.18)}
 .sp-dev .handle{position:absolute;left:90px;right:170px;top:-16px;height:26px;border-radius:14px 14px 0 0;background:#2a323b}
 .sp-dev .bezel{position:absolute;left:18px;top:18px;right:92px;bottom:18px;border-radius:20px;background:#1b232c;padding:12px}
 .sp-dev .scr{position:relative;width:100%;height:100%;border-radius:12px;background:#061127;overflow:hidden;font-family:ui-monospace,Consolas,"DejaVu Sans Mono",monospace}
@@ -1140,6 +1141,9 @@ function fit() {
   const wr = $('#wrap'), W = wr.clientWidth || window.innerWidth, H = wr.clientHeight || window.innerHeight;
   const s = Math.min(W / 1280, H / 720);
   st.style.transform = `translate(-50%,-50%) scale(${s})`;
+  // Ruang sisa di kiri-kanan / atas-bawah (koordinat panggung) agar splash memenuhi layar
+  st.style.setProperty('--bx', Math.max(0, Math.ceil((W / s - 1280) / 2)) + 'px');
+  st.style.setProperty('--by', Math.max(0, Math.ceil((H / s - 720) / 2)) + 'px');
   window.__scale = s;
   const hint = $('#rotate-hint');
   if (hint) hint.classList.toggle('show', H > W * 1.1 && !window.__hintClosed);
@@ -2235,8 +2239,8 @@ function showSplash() {
     ['Launch cable 500 m ... ', 'terpasang'], ['Jalur uji 5,00 km .... ', 'siap']];
   sp.innerHTML = `<div class="sp-grid"></div>
     <svg class="sp-fiber" viewBox="0 0 1280 720" preserveAspectRatio="none" aria-hidden="true">
-      ${[0, 1, 2].map(i => `<path d="M654 ${414 + i * 5} C 560 ${430 + i * 8}, 520 ${640 + i * 6}, 240 ${648 + i * 8} S -40 ${600 + i * 10}, -60 ${610 + i * 10}" stroke="${['#FFD54F', '#00C2FF', '#7cf0ff'][i]}" stroke-opacity=".28" stroke-width="5"/>
-        <path class="pulse" d="M-60 ${610 + i * 10} S 40 ${600 + i * 10}, 240 ${648 + i * 8} S 560 ${430 + i * 8}, 654 ${414 + i * 5}" stroke="${['#FFD54F', '#00C2FF', '#7cf0ff'][i]}" stroke-width="5" style="animation-delay:${i * 0.5}s"/>`).join('')}
+      ${[0, 1, 2].map(i => `<path d="M654 ${414 + i * 5} C 560 ${430 + i * 8}, 520 ${640 + i * 6}, 240 ${648 + i * 8} S -400 ${600 + i * 10}, -3000 ${610 + i * 10}" stroke="${['#FFD54F', '#00C2FF', '#7cf0ff'][i]}" stroke-opacity=".28" stroke-width="5"/>
+        <path class="pulse" d="M-3000 ${610 + i * 10} C -400 ${600 + i * 10}, -40 ${656 + i * 4}, 240 ${648 + i * 8} C 520 ${640 + i * 6}, 560 ${430 + i * 8}, 654 ${414 + i * 5}" stroke="${['#FFD54F', '#00C2FF', '#7cf0ff'][i]}" stroke-width="5" style="animation-delay:${i * 0.5}s"/>`).join('')}
     </svg>
     <div class="sp-left">
       <span class="hero-badge">${ICON.layers.replace('<svg', '<svg width="22" height="22"')} Lab Maya</span>
@@ -2259,7 +2263,7 @@ function showSplash() {
       </div></div>
       <div class="side"><i class="led"></i><i class="round"></i><i></i><i></i><i></i></div>
     </div>`;
-  sp.classList.add('show');
+  sp.classList.add('show'); $('#stage').classList.add('sp-on');
   const key = e => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); enter(false); } };
   const enter = full => {
     if (sp.classList.contains('out')) return;
@@ -2268,7 +2272,7 @@ function showSplash() {
     if (full) { try { const r = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (r && r.catch) r.catch(() => toast('Layar penuh tidak didukung di tampilan ini.')); } catch (e) {} }
     sp.classList.add('out');
     setTimeout(() => {
-      sp.classList.remove('show', 'out'); sp.innerHTML = '';
+      sp.classList.remove('show', 'out'); sp.innerHTML = ''; $('#stage').classList.remove('sp-on');
       const h = $('#view h2, #view h1'); if (h) { try { h.focus({ preventScroll: true }); } catch (e) {} }
     }, 460);
   };
