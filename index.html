@@ -270,7 +270,7 @@ textarea{width:100%;font:15px var(--font);border:1.5px solid #b9cde1;border-radi
 }
 /* ---------- Splash ---------- */
 #stage.sp-on{overflow:visible;box-shadow:none}
-#splash{position:absolute;top:calc(-1*var(--by,0px));bottom:calc(-1*var(--by,0px));left:calc(-1*var(--bx,0px));right:calc(-1*var(--bx,0px));z-index:80;display:none;color:#fff;overflow:hidden;background:radial-gradient(900px 620px at 72% 45%,#163b74 0%,#0b1e3f 52%,#040b18 100%)}
+#splash{position:absolute;top:calc(-1*var(--by,0px));bottom:calc(-1*var(--by,0px));left:calc(-1*var(--bxo,0px));right:calc(-1*var(--bxo,0px));z-index:80;display:none;color:#fff;overflow:hidden;background:radial-gradient(900px 620px at 72% 45%,#163b74 0%,#0b1e3f 52%,#040b18 100%)}
 #splash.show{display:block}
 #splash.out{opacity:0;transition:opacity .45s ease;pointer-events:none}
 .sp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,194,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,255,.07) 1px,transparent 1px);background-size:40px 40px;-webkit-mask-image:radial-gradient(ellipse at 60% 50%,#000 30%,transparent 78%);mask-image:radial-gradient(ellipse at 60% 50%,#000 30%,transparent 78%)}
@@ -712,7 +712,7 @@ const ENGINE = (() => {
     const yMin = o.yMin != null ? o.yMin : -45, yMax = 0;
     const X = km => m.l + (km / o.range) * pw;
     const Y = db => m.t + ((yMax - db) / (yMax - yMin)) * ph;
-    let s = `<svg viewBox="0 0 ${W} ${H}" class="plot${mini ? ' mini' : ''}" data-l="${m.l}" data-pw="${pw}" data-range="${o.range}" data-w="${W}" role="img" aria-label="${o.label || 'Grafik trace OTDR'}">`;
+    let s = `<svg viewBox="0 0 ${W} ${H}" class="plot${mini ? ' mini' : ''}"${mini ? '' : ` style="max-width:${o.maxw || W}px;margin:0 auto"`} data-l="${m.l}" data-pw="${pw}" data-range="${o.range}" data-w="${W}" role="img" aria-label="${o.label || 'Grafik trace OTDR'}">`;
     s += `<rect x="0" y="0" width="${W}" height="${H}" rx="${mini ? 8 : 10}" class="plot-bg"/>`;
     if (!mini) {
       for (let d = 0; d >= yMin; d -= 5) {
@@ -1140,9 +1140,13 @@ function fit() {
   const st = $('#stage');
   const wr = $('#wrap'), W = wr.clientWidth || window.innerWidth, H = wr.clientHeight || window.innerHeight;
   const s = Math.min(W / 1280, H / 720);
+  // Lebar panggung ikut melebar (maks. ±3:1) agar kiri-kanan penuh; tinggi tetap 720
+  const SW = Math.max(1280, Math.min(Math.floor(W / s), 2400));
+  st.style.width = SW + 'px';
   st.style.transform = `translate(-50%,-50%) scale(${s})`;
-  // Ruang sisa di kiri-kanan / atas-bawah (koordinat panggung) agar splash memenuhi layar
+  // Ruang sisa (koordinat panggung) untuk splash
   st.style.setProperty('--bx', Math.max(0, Math.ceil((W / s - 1280) / 2)) + 'px');
+  st.style.setProperty('--bxo', Math.max(0, Math.ceil((W / s - SW) / 2)) + 'px');
   st.style.setProperty('--by', Math.max(0, Math.ceil((H / s - 720) / 2)) + 'px');
   window.__scale = s;
   const hint = $('#rotate-hint');
@@ -2088,7 +2092,7 @@ SCREENS.L15 = {
         </div>
         <div class="panel-dark col" style="flex:1;gap:6px">
           <div class="row small" style="color:#8fb3d9">${st.tested ? `${st.tested.lambda} nm · range ${st.tested.range} km · pulse ${ENGINE.PULSE[st.tested.pulse].label} · penanda event dimatikan` : 'Jalankan tes untuk melihat trace.'}</div>
-          <div id="ph" class="plot-holder">${ENGINE.plot({ w: 640, h: 380, range: st.tested ? st.tested.range : 10, traces: tr ? [{ pts: tr.pts, color: LAMS[st.tested.lambda], anim: !!st._anim }] : [], markers, cursor: tr ? (st.cursor || 1) : null })}</div>
+          <div id="ph" class="plot-holder">${ENGINE.plot({ w: 640, h: 380, maxw: 604, range: st.tested ? st.tested.range : 10, traces: tr ? [{ pts: tr.pts, color: LAMS[st.tested.lambda], anim: !!st._anim }] : [], markers, cursor: tr ? (st.cursor || 1) : null })}</div>
           <div class="readout"><span class="v" id="rk">${tr ? '' : '—'}</span><span id="rdb"></span><span class="spacer"></span>
             <button class="btn blue sm" id="markM" ${tr && st.marks.length < 2 && !st.last ? '' : 'disabled'}>${ICON.target} Tandai Lokasi</button></div>
         </div>
